@@ -30,10 +30,13 @@ export type ProblemGroup = {
 
 export function splitTicket(reports: Report[], ticket: number, tenantOf: (r: Report) => Tenant | undefined): { total: number; groups: ProblemGroup[] } {
   const merged = uniqueById(reports).filter((r) => r.mergedInto === ticket);
+  // Counted the desk's way: every report where it is filed by cause (causes.ts), and the
+  // one-day moves a second time under `shift`, as the desk read them (desk-notes.json).
   const by = new Map<Problem, Report[]>();
+  const add = (p: Problem, r: Report) => by.set(p, [...(by.get(p) ?? []), r]);
   for (const r of merged) {
-    const p = problemOf(r, tenantOf(r));
-    by.set(p, [...(by.get(p) ?? []), r]);
+    add(causeOf(r, tenantOf(r)) ?? 'unplaced', r);
+    if (problemOf(r, tenantOf(r)) === 'shift') add('shift', r);
   }
   const groups = [...by.entries()]
     .map(([problem, rs]) => {

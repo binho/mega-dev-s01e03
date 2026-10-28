@@ -39,10 +39,12 @@ The tenant decides the cause, not the intake tag and not the reporter's browser
 2. **`hint`**: the report came in through the form of a tenant on `booking-v3`. That form prints
    `MM/DD/YYYY` under the date field, people type what it says, and the form reads the date the
    tenant's way. The parser fix does not touch this.
-3. **`parser`**: every other report. The shared parser reads the tenant's day-first date month
+3. **`parser`**: every report not placed under `hint`, the one-day moves included. The shared parser reads the tenant's day-first date month
    first, so day and month flip.
 
-Duplicate rows from overlapping export pages are counted once, by report id.
+Duplicate rows from overlapping export pages are counted once, by report id. Counts follow the
+desk's own view: a report is counted where it is filed, so the `shift` reports also count under
+`parser`, where their tenant files them. The rows add up to more than the ticket for that reason.
 
 ## What is wrong with the old page
 
