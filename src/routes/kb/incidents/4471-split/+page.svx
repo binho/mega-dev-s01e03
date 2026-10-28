@@ -1,0 +1,61 @@
+---
+layout: runbook
+title: '#4471 split · three problems, not one'
+owner: support desk
+status: accepted
+reviewed: 2026-10-28
+signature: v1.eyJzdWIiOiI0NjQ4IiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpYXQiOjE3OTMxOTczOTksImV4cCI6MTc5MzI4Mzc5OX0.09XGj1Ww41rDHg1mPPEpmXxYXrxWiXoYp-bMdJuEcEk
+---
+
+<script>
+  import SplitTable from '#lib/kb/SplitTable.svelte';
+  import Callout from '#lib/kb/Callout.svelte';
+  import RenderStamp from '#lib/kb/RenderStamp.svelte';
+
+  const repo = 'https://github.com/binho/mega-dev-s01e03/issues';
+  const issues = { parser: `${repo}/1`, hint: `${repo}/2`, shift: `${repo}/3` };
+</script>
+
+[#4471](/kb/incidents/4471) is marked *known: one issue, one fix queued*. It is not one issue.
+The desk merged on subject line ([decision 0001](/kb/decisions/0001-dedupe-by-subject)), so every
+report about a wrong date landed in one ticket. Read by what each report describes, the ticket
+holds three problems. The queued parser fix closes only the first.
+
+<SplitTable ticket={4471} {issues} />
+
+<Callout kind="warn">
+Do not close #4471 when the parser fix ships. Two of its problems need their own fixes.
+</Callout>
+
+## How each report was placed
+
+The tenant decides the cause, not the intake tag and not the reporter's browser
+(`src/lib/kb/causes.ts`). Every tenant on file writes the day first.
+
+1. **`shift`**: the body says the date moved by one day, or the same meeting landed on different
+   days for people in different places. The desk already listed these in `desk-notes.json` as
+   *read as a one-day move*, then filed them under `parser`. A day-first parser bug flips day and
+   month; it cannot move 12 May to 11 May. This is a time-zone problem.
+2. **`hint`**: the report came in through the form of a tenant on `booking-v3`. That form prints
+   `MM/DD/YYYY` under the date field, people type what it says, and the form reads the date the
+   tenant's way. The parser fix does not touch this.
+3. **`parser`**: every other report. The shared parser reads the tenant's day-first date month
+   first, so day and month flip.
+
+Duplicate rows from overlapping export pages are counted once, by report id.
+
+## What is wrong with the old page
+
+- The intake tags (`parser`, `hint`) were guessed from the browser. They disagree with the tenant
+  rule on many reports; ignore them.
+- `CauseTable` on [#4471](/kb/incidents/4471) shows the `hint` reports as *not this ticket — no
+  ticket of its own*, and keeps the one-day moves inside `parser` as a footnote. Both now have a
+  ticket.
+
+## For the desk
+
+- New wrong-date report: place it with the three steps above, then merge it into that problem's
+  ticket, not #4471.
+- Subject lines do not separate these problems. Several subjects, such as *Date is wrong*, appear under all three.
+
+<RenderStamp {signature} />
